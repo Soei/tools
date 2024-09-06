@@ -1,0 +1,35 @@
+{
+  "name": "@soei/tools",
+  "version": "1.0.13",
+  "description": "工具类",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./test"
+  },
+  "keywords": [
+    "merge",
+    "each",
+    "runer",
+    "iList2Array",
+    "iPickNumber",
+    "iSplit",
+    "isFunction",
+    "isNil",
+    "isSimplyType",
+    "isElement",
+    "isArray",
+    "isString",
+    "isNodeList",
+    "isEmpty",
+    "isNumber",
+    "Between",
+    "length",
+    "zoom"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://www.github.com/alwbg"
+  },
+  "author": "soei | alwbg@163.com",
+  "license": "ISC"
+}
