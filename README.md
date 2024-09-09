@@ -1,6 +1,6 @@
-工具类
+![安装](https://img.shields.io/badge/安装-npm_i_@soei/tools-ffc107?style=flat) [![Latest Version on NPM](https://img.shields.io/badge/✔-线上实例-ae8aff?style=flat)](https://alwbg.github.io)
 
-## [线上示例](https://alwbg.github.io) ☟
+# JS工具类~ [![Latest Version on NPM](https://img.shields.io/npm/v/@soei/tools?label=npm&style=flat-square)](https://npmjs.com/package/@soei/tools) ![Software License](https://img.shields.io/badge/license-ISC-brightgreen?label=&style=flat-square) [![npm](https://img.shields.io/npm/dw/@soei/tools?label=Downloads&style=flat-square)](https://www.npmjs.com/package/@soei/tools) ![npm bundle size](https://img.shields.io/bundlephobia/min/%40soei%2Ftools?label=Size&color=&style=flat-square)
 
 > #### Online
 >

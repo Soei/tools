@@ -1,8 +1,10 @@
 {
   "name": "@soei/tools",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "工具类",
   "main": "index.js",
+  "author": "soei | alwbg@163.com",
+  "license": "ISC",
   "scripts": {
     "test": "node ./test"
   },
@@ -28,8 +30,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://www.github.com/alwbg"
-  },
-  "author": "soei | alwbg@163.com",
-  "license": "ISC"
+    "url": "https://www.github.com/soei/tools"
+  }
 }
