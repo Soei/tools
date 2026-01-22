@@ -17,6 +17,40 @@
 
 ## 更新日志
 
+### 1.0.15
+
+- #### 修改 `runer(Array)` 的分支逻辑
+  - 支持`[function, context, ...args]`
+
+  ```javascript
+  runer(
+    [
+      function () {
+        console.log(this);
+      },
+      [
+        [
+          function (name) {
+            console.log(this, name);
+          },
+          { name: 2 },
+          1,
+        ],
+        [
+          function () {
+            console.log(this);
+          },
+          { name: 3 },
+        ],
+      ],
+    ],
+    { name: 1 },
+  );
+  // { name: 1 }
+  // { name: 2 } 1
+  // { name: 3 }
+  ```
+
 ### 1.0.13
 
 - #### 新增 zoom(容器宽, 容器高, 目标宽, 目标高, 追加值) : [宽, 高]
@@ -282,7 +316,7 @@ each(
   {
     1: 2,
     2: 3,
-  }
+  },
 );
 ```
 
@@ -302,7 +336,7 @@ runer(
     name: "loop",
   },
   1,
-  2
+  2,
 );
 // 输出: this is loop 1 2
 ```

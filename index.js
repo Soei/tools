@@ -64,24 +64,30 @@ function runer(rank, context) {
     }
     for (var r = 0, rl = rank.length; r < rl; r++) {
         exec = rank[r];
-        /* 判断是否通过索引访问数组 */
-        if (isArray(context) && isNumber(exec)) {
-            return context[
-                /* 获取数组长度 */
-                length = context.length,
-                (
-                    length + (exec % length)
-                ) % length
-            ];
+        if (isArray(exec)) {
+            runer[each(exec, function (i, fx) {
+                if (i >= 1 && !isFunction(fx) && !isArray(fx)) return true;
+            }) ? 'apply' : 'call'](Nil, exec);
+        } else {
+            /* 判断是否通过索引访问数组 */
+            if (isArray(context) && isNumber(exec)) {
+                return context[
+                    /* 获取数组长度 */
+                    length = context.length,
+                    (
+                        length + (exec % length)
+                    ) % length
+                ];
+            }
+            /* 如果是基本数据类型, 作为属性获取 */
+            isSimplyType(exec) && (exec = context[exec]);
+            /* 如果获得的值为function, 执行 */
+            if (isFunction(exec)) {
+                /* 包含不含有apply方法的函数执行, 处理,原型链缺失apply的function */
+                msg = Function.prototype.apply.call(exec, context, args);
+                if (msg !== Nil) return msg;
+            } else if (!isNil(exec)) return exec;
         }
-        /* 如果是基本数据类型, 作为属性获取 */
-        isSimplyType(exec) && (exec = context[exec]);
-        /* 如果获得的值为function, 执行 */
-        if (isFunction(exec)) {
-            /* 包含不含有apply方法的函数执行, 处理,原型链缺失apply的function */
-            msg = Function.prototype.apply.call(exec, context, args);
-            if (msg !== Nil) return msg;
-        } else if (!isNil(exec)) return exec;
     }
 }
 /**
