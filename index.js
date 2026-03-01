@@ -71,13 +71,18 @@ function runer(rank, context) {
         } else {
             /* 判断是否通过索引访问数组 */
             if (isArray(context) && isNumber(exec)) {
-                return context[
+                var _default = args.shift();
+                if (isNil(_default)) {
                     /* 获取数组长度 */
-                    length = context.length,
-                    (
+                    length = context.length;
+                    length = (
                         length + (exec % length)
-                    ) % length
-                ];
+                    ) % length;
+                    exec = context[length];
+                } else {
+                    exec = context[exec] = _default
+                }
+                return exec
             }
             /* 如果是基本数据类型, 作为属性获取 */
             isSimplyType(exec) && (exec = context[exec]);
