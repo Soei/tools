@@ -54,10 +54,14 @@ function merge(s, o, e, i) {
 function runer(rank, context) {
     if (isNil(rank)) return Nil;
     var args = iList2Array(arguments);
+    /* 上下文是当前全局变量时 */
+    var isGlobalContext = isNullOrUndefined(context);
+
     rank = args.shift();
     context = args.shift();
     // 判断宿主
-    context = isNullOrUndefined(context) ? this : context;
+    context = isGlobalContext ? this : context;
+
     var msg, exec, length;
     if (!isArray(rank)) {
         rank = [rank];
@@ -65,9 +69,25 @@ function runer(rank, context) {
     for (var r = 0, rl = rank.length; r < rl; r++) {
         exec = rank[r];
         if (isArray(exec)) {
-            runer[each(exec, function (i, fx) {
-                if (i >= 1 && !isFunction(fx) && !isArray(fx)) return true;
-            }) ? 'apply' : 'call'](Nil, exec);
+            if (args.length || isGlobalContext) {
+                var ownContext = exec[1];
+                /**
+                 * [function, context, ...args] 
+                 * context 不能是函数 和 数组
+                 * */
+                var isExeList = !isFunction(ownContext) && !isArray(ownContext);
+                /* 创建新的数组操作 */
+                exec = exec.concat([]);
+                if (!isExeList) {
+                    exec = [exec]
+                }
+                /* 如果自定义的function[exec.0.call(context)内context没指定],添加执行上下文 */
+                isGlobalContext || (exec[1] = context);
+                exec.push.apply(exec, args);
+            }
+            var end = runer.apply(Nil, exec);
+            if (!isNil(end))
+                return end;
         } else {
             /* 判断是否通过索引访问数组 */
             if (isArray(context) && isNumber(exec)) {
