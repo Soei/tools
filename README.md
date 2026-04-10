@@ -17,6 +17,23 @@
 
 ## 更新日志
 
+### 1.1.0
+
+- #### 修改 `runer(Array)` 的分支逻辑
+  - 支持`[string|number|array, context]`
+
+  ```javascript
+  const res = { name: "Joyer" };
+  runer([
+    /* 获取 res 的 data|permission 属性 */
+    ["data", res],
+    ["permission", res],
+    [["data", "permission", "name"], res],
+    /* 返回 res 自身, 以上都未匹配到时返回自身 */
+    [0, [res]],
+  ]);
+  ```
+
 ### 1.0.15
 
 - #### 修改 `runer(Array)` 的分支逻辑

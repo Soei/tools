@@ -78,7 +78,7 @@ function runer(rank, context) {
                 var isExeList = !isFunction(ownContext) && !isArray(ownContext);
                 /* 创建新的数组操作 */
                 exec = exec.concat([]);
-                if (!isExeList) {
+                if (!isSimplyType(exec[0]) && !isExeList) {
                     exec = [exec]
                 }
                 /* 如果自定义的function[exec.0.call(context)内context没指定],添加执行上下文 */
