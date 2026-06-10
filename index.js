@@ -69,6 +69,7 @@ function runer(rank, context) {
     for (var r = 0, rl = rank.length; r < rl; r++) {
         exec = rank[r];
         if (isArray(exec)) {
+            let max = exec.length;
             if (args.length || isGlobalContext) {
                 var ownContext = exec[1];
                 /**
@@ -86,6 +87,7 @@ function runer(rank, context) {
                 exec.push.apply(exec, args);
             }
             var end = runer.apply(Nil, exec);
+            if (max > 1 && end === -1) break;
             if (!isNil(end))
                 return end;
         } else {
@@ -234,7 +236,7 @@ var isNodeList = function (nl) {
 /* 判断对象是否为空 */
 function isEmpty(O) {
     if (isElement(O)) return false;
-    for (var _ in O) if (O.hasOwnProperty(_)) return false;
+    for (var _ in O) if (O.hasOwnProperty && O.hasOwnProperty(_)) return false;
     return true;
 }
 /**
