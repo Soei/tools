@@ -329,7 +329,133 @@ Between.prototype.fire = function (data, isinput) {
     this.last = ret = (ret ? ret : data === SPACE ? SPACE : data > max ? max : min).toString()
     return isinput ? ret : decimal ? (+ret).toFixed(decimal) : ret;
 }
+/* 获取数据 */
+const _Get__ = (value, data) => {
+    value = value.split(".");
+    let key,
+        mark = value.length, name, res;
+    while (
+        key = value.shift(), mark-- && (data = data[key])
+    ) {
+        name = key;
+        res = data;
+    }
+    name = key || name;
+    return { name, data, res, next: value, has: mark };
+}
+
+const _Create__ = (value, data) => {
+    let isList;
+    value = value.split(".");
+    let key, length = value.length,
+        name,
+        res;
+    for (; --length;) {
+        key = value.shift()
+        isList = key.match(/([^.]*)\[\s*\]/);
+        if (isList) {
+            key = isList[1];
+            break;
+        }
+        data = data[key] || (data[key] = isList ? [] : {});
+        name = key;
+        res = data;
+    }
+    name = value.shift() || key || name;
+    return { name, data, list: !!isList };
+};
+const _R__ = {};
+const _M__ = {
+    "*"(item, value, data, res, filter) {
+        let index = isString(this) ? this : 0;
+        let mark = 0,
+            same = item == value;
+        let r = _Get__(item, data),
+            has = r.has,
+            next = r.next.join(".");
+        data = r.res || data;
+        let name = r.name;
+        let R =
+            _R__[name] || (_R__[name] = new RegExp(name.replace(/(\*)/, "(.$1)"))),
+            cur;
+        for (let i in data) {
+            if (R.test(i)) {
+                cur = data[i];
+                if (cur === undefined) continue;
+                if (has && !isSimplyType(cur)) {
+                    if (next.indexOf("*") > -1) {
+                        _M__["*"].call(i, next, value, cur, res, filter);
+                        continue;
+                    }
+                }
+                if (same) {
+                    res[i] = cur;
+                } else {
+                    let key = value.replace(/\*/g, index ? index : i.match(R)[1]);
+                    if (next) {
+                        _M__.default(next, key, cur, res, filter);
+                    } else {
+                        // console.log("key:::", key, value);
+                        key = _Create__(key, res);
+                        // console.log("key:::!", key);
+                        let r = runer(filter, null, i, cur, item);
+
+                        r === undefined || (cur = r);
+                        key.list ? key.data.push(cur) : (key.data[key.name] = cur);
+                    }
+                }
+
+                mark++;
+            }
+        }
+        if (mark) {
+            return -1;
+        }
+    },
+    default(item, value, data, res, filter) {
+        let items = _Get__(item, data);
+        if ((data = items.data) !== undefined) {
+            value = _Create__(value, res);
+            let r = runer(filter, null, item, data, value.name);
+            r === undefined || (data = r);
+            value.list ? value.data.push.call(value.data, data) : (value.data[value.name] = data);
+            return -1;
+        }
+    },
+};
+
+function _Split__(items) {
+    let splitter = items.split(/(?:,|\s+)/g);
+    let ranks = [];
+    splitter.forEach((item, k) => {
+        if (/^\s*$/.test(item)) return;
+        let source = item.match(/(.*)(?:=>|\:)(.*)/) || [];
+        let key = source[1] || item;
+        let rank = [];
+        ranks.push([rank]);
+        key.split(/\||;/).forEach((item) => {
+            let K = item.match(/(?:\*|\?)/) || '';
+            K = runer([
+                [0, K],
+                [0, ["default"]],
+            ]);
+            rank.push([_M__[K], null, item, source[2] || item]);
+        });
+    });
+    return ranks;
+}
+const PICKERMAP = {};
+let take = (data, multi, filter) => {
+    let _ = PICKERMAP[multi];
+    if (!_) {
+        _ = PICKERMAP[multi] = _Split__(multi);
+    }
+    let value = {};
+    runer(_, 0, data, value, filter);
+    return value;
+};
 module.exports = {
+    take,
     each,
     merge,
     runer,
