@@ -343,26 +343,26 @@ const _Get__ = (value, data) => {
     name = key || name;
     return { name, data, res, next: value, has: mark };
 }
-
+const RLi = /([^.]*)\[\s*\]/;
 const _Create__ = (value, data) => {
-    let isList;
+    let isLi, hasLi = RLi.test(value);
     value = value.split(".");
-    let key, length = value.length,
+    let key, length = value.length - +!hasLi,
         name,
         res;
-    for (; --length;) {
-        key = value.shift()
-        isList = key.match(/([^.]*)\[\s*\]/);
-        if (isList) {
-            key = isList[1];
-            break;
+    for (; length--;) {
+        key = value.shift();
+        isLi = key.match(RLi);
+        if (isLi) {
+            key = isLi[1];
         }
-        data = data[key] || (data[key] = isList ? [] : {});
+        data = data[key] || (data[key] = isLi ? [] : {});
+        if (isLi) break;
         name = key;
         res = data;
     }
     name = value.shift() || key || name;
-    return { name, data, list: !!isList };
+    return { name, data, list: !!isLi };
 };
 const _R__ = {};
 const _M__ = {
