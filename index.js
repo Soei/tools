@@ -60,7 +60,7 @@ function runer(rank, context) {
     rank = args.shift();
     context = args.shift();
     // 判断宿主
-    context = isGlobalContext ? this : context;
+    context = isGlobalContext ? this || SPACE : context;
 
     var msg, exec, length;
     if (!isArray(rank)) {
