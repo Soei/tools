@@ -391,14 +391,14 @@ const _M__ = {
                 if (same) {
                     res[i] = cur;
                 } else {
-                    let key = value.replace(/\*/g, index ? index : i.match(R)[1]);
+                    let key = value.replace(/\*/g, i.match(R)[1] || index);
                     if (next) {
                         _M__.default(next, key, cur, res, filter);
                     } else {
                         // console.log("key:::", key, value);
                         key = _Create__(key, res);
                         // console.log("key:::!", key);
-                        let r = runer(filter, null, i, cur, item);
+                        let r = runer(filter, null, i, cur, key.name || item);
 
                         r === undefined || (cur = r);
                         key.list ? key.data.push(cur) : (key.data[key.name] = cur);
