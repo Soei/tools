@@ -8,7 +8,7 @@ type TakeFilter = (key: string, value: any, data: any) => any;
 export function take<T = any>(
   data: any,
   multi: string,
-  source: TakeFilter | T,
+  source?: TakeFilter | T,
   filter?: TakeFilter | T,
 ): T;
 
