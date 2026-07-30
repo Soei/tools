@@ -445,12 +445,19 @@ function _Split__(items) {
     return ranks;
 }
 const PICKERMAP = {};
-let take = (data, multi, filter) => {
+let take = (data, multi, source, filter) => {
     let _ = PICKERMAP[multi];
     if (!_) {
         _ = PICKERMAP[multi] = _Split__(multi);
     }
-    let value = {};
+    let isF = isFunction(source);
+    let value = isF ? {} : filter;
+    if (isF) {
+        isFunction(filter) || (filter = source);
+        value = {};
+    } else {
+        value = source;
+    }
     runer(_, 0, data, value, filter);
     return value;
 };
