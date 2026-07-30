@@ -5,6 +5,7 @@
   "main": "index.js",
   "author": "soei | alwbg@163.com",
   "license": "ISC",
+  "types": "./index.d.ts",
   "scripts": {
     "test": "node ./test"
   },
