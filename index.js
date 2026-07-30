@@ -456,7 +456,7 @@ let take = (data, multi, source, filter) => {
         isFunction(filter) || (filter = source);
         value = {};
     } else {
-        value = source;
+        value = source || {};
     }
     runer(_, 0, data, value, filter);
     return value;
