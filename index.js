@@ -451,7 +451,7 @@ let take = (data, multi, source, filter) => {
         _ = PICKERMAP[multi] = _Split__(multi);
     }
     let isF = isFunction(source);
-    let value = isF ? {} : filter;
+    let value;
     if (isF) {
         isFunction(filter) || (filter = source);
         value = {};
