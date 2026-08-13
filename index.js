@@ -414,11 +414,25 @@ const _M__ = {
     },
     default(item, value, data, res, filter) {
         let items = _Get__(item, data);
+        let host = data;
         if ((data = items.data) !== undefined) {
             value = _Create__(value, res);
-            let r = runer(filter, null, item, data, value.name);
+            let name, r = runer(filter, null, item, data, name = value.name);
             r === undefined || (data = r);
-            value.list ? value.data.push.call(value.data, data) : (value.data[value.name] = data);
+            item = value.data;
+            value.list
+                ?
+                (
+                    isArray(item)
+                        ?
+                        item
+                        :
+                        (item = res[name] = [], item.default = item)
+                ).push(data)
+                : (
+                    // res[name] = item = { default: item },
+                    item[name] = data
+                );
             return -1;
         }
     },

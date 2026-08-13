@@ -9,7 +9,7 @@ export function take<T = any>(
   data: any,
   multi: string,
   source?: TakeFilter | T,
-  filter?: TakeFilter | T,
+  filter?: TakeFilter,
 ): T;
 
 /** 遍历 Array / Object / Set / Map / NodeList。
