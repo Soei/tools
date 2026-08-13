@@ -427,7 +427,7 @@ const _M__ = {
                         ?
                         item
                         :
-                        (r = res[name] = [], r.default = item)
+                        (r = res[name] = [], r.default = item, r)
                 ).push(data)
                 : (
                     // res[name] = item = { default: item },
