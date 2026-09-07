@@ -1,6 +1,6 @@
 {
   "name": "@soei/tools",
-  "version": "1.1.18",
+  "version": "1.1.19",
   "description": "工具类",
   "main": "index.js",
   "author": "soei | alwbg@163.com",
@@ -28,7 +28,9 @@
     "Between",
     "length",
     "zoom",
-    "take"
+    "take",
+    "bus",
+    "Event"
   ],
   "repository": {
     "type": "git",

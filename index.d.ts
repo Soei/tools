@@ -100,3 +100,28 @@ export class Between {
 
 /** 获取数据的字符串长度（toString 后） */
 export function length(data: any): number;
+type EventHandlerItem = [ (...args: any[]) => void, any, ...any[] ];
+
+export declare class Event {
+    readonly #list: Map<string, EventHandlerItem[]>;
+    constructor();
+    /**
+     * 清理 @see name 事件
+     * @param name 事件索引key
+     * @param trigger 要移除的回调函数或者完整handler数组项
+     */
+    off(name: string, trigger?: EventHandlerItem | ((...args: any[]) => void)): void;
+    /**
+     * 注册@see name 的事件处理
+     * @param name 事件索引key
+     * @param trigger 回调函数 或者 [fn, context, ...args] 数组
+     */
+    on(name: string, trigger: EventHandlerItem | ((...args: any[]) => void)): void;
+    /**
+     * 触发对应@see name 注册事件
+     * @param name 事件索引key
+     * @param args 参数
+     */
+    emit(name: string, ...args: any[]): void;
+}
+export declare const bus: Event

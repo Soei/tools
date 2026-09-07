@@ -17,6 +17,43 @@
 
 ## 更新日志
 
+### 1.1.19
+
+- `Event` 事件
+- `bus` Event 的一个实例, 单例
+
+```javascript
+import { bus, Event, iList2Array } from "@soei/tools";
+
+let e = bus | new Event(),
+  rank;
+e.on("name", rank = [
+  /**
+   *
+   * args1: 1
+   * args2: 2
+   * ...args: emit(name, ...args)
+   */
+  function (args1, args2, ...args) {
+    // this: host
+  },
+  "host",
+  1,
+  2,
+]);
+e.on(
+  "name",
+  function () {
+    let args = iList2Array(arguments);
+    console.log(args);
+  },
+);
+e.emit("name", /* ...args */ "args");
+e.off("name" /* , rank 删除指定监听 */);
+e.emit("name", "re");
+```
+
+
 ### 1.1.7
 
 - `take更新`

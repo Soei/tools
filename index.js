@@ -475,7 +475,55 @@ let take = (data, multi, source, filter) => {
     runer(_, 0, data, value, filter);
     return value;
 };
+/**
+ * 处理时间
+ */
+class Event {
+    #list;
+    constructor() {
+        this.#list = new Map()
+    }
+    /**
+     * 清理 @see name 事件
+     * @param {String} name 事件索引key
+     * @param {Array<[Function, context, ...args]>|Function} trigger 
+     */
+    off(name, trigger) {
+        let list = this.#list;
+        if (trigger) {
+            let trs = list.get(name) || [];
+            trs.splice(trs.indexOf(trigger), 1);
+        } else
+            list.delete(name)
+    }
+    /**
+     * 注册@see name 的事件处理
+     * @param {String} name 事件索引key
+     * @param {Array<[Function, context, ...args]>|Function} trigger 
+     */
+    on(name, trigger) {
+        let trs = this.#list.get(name);
+        trs || this.#list.set(name, trs = []);
+        trs.push(trigger);
+    }
+    /**
+     * 触发对应@see name 注册事件
+     * @param {String} name 事件索引key
+     * @param  {...any} ...args 参数
+     */
+    emit(name) {
+        let args = iList2Array(arguments);
+        let trs = this.#list.get(name) || [[function (name) {
+            console.warn('Not Found [', name, '] !')
+        }, null, name]];
+        args.splice(0, 1, trs/* 执行列表 */, null/* 执行上下文 , this */);
+        runer.apply(null, args);
+    }
+}
 module.exports = {
+    Event,
+    /* 单例模式创建一个默认存储 */
+    bus: new Event(),
     take,
     each,
     merge,
