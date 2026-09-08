@@ -102,9 +102,19 @@ export class Between {
 export function length(data: any): number;
 type EventHandlerItem = [ (...args: any[]) => void, any, ...any[] ];
 
+/**
+ * 注册事件监听
+ */
 export declare class Event {
     readonly #list: Map<string, EventHandlerItem[]>;
-    constructor();
+    constructor(key?: string);
+    /* 销毁当前对象 */
+    destroyed(): void;
+    /**
+     * 清空当前对象监听 @
+     * 如果是单例, 清理当前 new Event(key) 中 key对应的 的所有监听
+     */
+    clear(): void
     /**
      * 清理 @see name 事件
      * @param name 事件索引key

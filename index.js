@@ -476,12 +476,23 @@ let take = (data, multi, source, filter) => {
     return value;
 };
 /**
- * 处理时间
+ * 处理事件
  */
 class Event {
     #list;
-    constructor() {
-        this.#list = new Map()
+    #name;
+    static #map = new Map();
+    constructor(key) {
+        this.#name = key;
+        let M = Event.#map;
+        this.#list = M.get(key) || M.set(key, new Map()).get(key);
+    }
+    clear() {
+        this.#list.clear();;
+    }
+    destroyed() {
+        Event.#map.delete(this.#name);
+        this.clear();
     }
     /**
      * 清理 @see name 事件
@@ -514,7 +525,7 @@ class Event {
     emit(name) {
         let args = iList2Array(arguments);
         let trs = this.#list.get(name) || [[function (name) {
-            console.warn('Not Found [', name, '] !')
+            console.warn('[', name, '] Not Found !')
         }, null, name]];
         args.splice(0, 1, trs/* 执行列表 */, null/* 执行上下文 , this */);
         runer.apply(null, args);
