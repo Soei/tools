@@ -528,7 +528,7 @@ class Event {
             console.warn('[', name, '] Not Found !')
         }, null, name]];
         args.splice(0, 1, trs/* 执行列表 */, null/* 执行上下文 , this */);
-        runer.apply(null, args);
+        return runer.apply(null, args);
     }
 }
 module.exports = {

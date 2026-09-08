@@ -132,6 +132,6 @@ export declare class Event {
      * @param name 事件索引key
      * @param args 参数
      */
-    emit(name: string, ...args: any[]): void;
+    emit(name: string, ...args: any[]): any;
 }
 export declare const bus: Event
