@@ -24,7 +24,7 @@ type TakeFilter = (key: string, value: any, data: any) => any;
 export function take<T = any>(
   data: any,
   multi: string,
-  source?: (key: string, value: any, data: any) => any | T,
+  source?: ((key: string, value: any, data: any) => any) | T,
   filter?: (key: string, value: any, data: any) => any,
 ): T;
 
