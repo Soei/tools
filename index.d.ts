@@ -1,11 +1,17 @@
 // 强制展开工具类型
 type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
-type TakeFilter = (key: string, value: any, data: any) => any;
+
+type TakeType =
+  | Record<string, any>
+  | []
+  | ((key: string, value: any, data: any) => any);
 /**
  * ## `数据提取器`
  * 按规则从 data 中提取字段。
  * - ### `#使用`
  * ```javascript
+ * // #0
+ * take({data: {name: 1}}, 'data.name:a.b.c.name');
  * // #1
  * take({data: {name: 1}}, 'data.name:a.b.c.name', {});
  * // #2
@@ -13,7 +19,7 @@ type TakeFilter = (key: string, value: any, data: any) => any;
  * ```
  * - ### `#返回`
  * ```javascript
- * // #1
+ * // #0 == #1 这里相等 是 返回的都是新的, 区别在与 #0 返回新的对象 #1 为指定的对象添加
  * {a: {b: {c: {name: 1}}}}
  * // #2
  * { me: 1, amexx: 1 }
@@ -21,12 +27,16 @@ type TakeFilter = (key: string, value: any, data: any) => any;
  *  multi 支持格式："key1,key2" | "srcKey=>dstKey" | "srcKey:dstKey" | "pattern*=>target*" 等。
  *  filter 为函数时，value 从 {} 起步；filter 为非函数时作为初始值对象。
  */
-export function take<T = any>(
-  data: any,
-  multi: string,
-  source?: ((key: string, value: any, data: any) => any) | T,
+export function take<
+  T = Record<string, any> | [],
+  M extends string = string,
+  U extends TakeType = TakeType,
+>(
+  data: T,
+  multi: M,
+  source?: U,
   filter?: (key: string, value: any, data: any) => any,
-): T;
+): U extends Function ? Record<string, any> : U;
 
 /** 遍历 Array / Object / Set / Map / NodeList。
  *  func 返回非 Nil 值时提前终止遍历并返回该值。
@@ -65,8 +75,8 @@ export function merge(host: any, ...sources: any[]): void;
  *  rank 为函数/值或其嵌套数组 [[fn, context?, ...args], ...]。
  *  返回第一个非 Nil 的执行结果；-1 表示 break。
  */
-export function runer(
-  rank: Array<any> | string,
+export function runer<T extends any = any>(
+  rank: T,
   context?: any,
   ...args: any[]
 ): any;
@@ -158,10 +168,11 @@ export type EventHandlerItem<Payload = any> =
 
 // type EventHandlerItem = ((...args: any[]) => any) | [(...args: any[]) => any, unknown, ...any[]];
 type ExpandedHandler = Expand<EventHandlerItem>;
+type EventOnType = Expand<EventHandlerItem | any>;
 /**
  * 注册事件监听
  */
-export declare class Event<T extends Record<string, unknown>> {
+export declare class Event<T extends any = any> {
   readonly #list: T;
   constructor(key?: string);
 
@@ -195,9 +206,9 @@ export declare class Event<T extends Record<string, unknown>> {
    * - 如果 `自身` 或者 `数组[0]` 为 `非函数`, 作为存储用, let value = emit(`@see name` [,...]); 可获取
    * @returns 返回trigger的返回值
    */
-  on<Name extends keyof T>(
+  on<Name extends string = string, TR extends EventOnType = EventOnType>(
     name: Name,
-    trigger: Expand<EventHandlerItem<T[Name]>>,
+    trigger: TR,
   ): any;
 
   // on(name: string, trigger: EventHandlerItem): any;
@@ -212,6 +223,9 @@ export declare class Event<T extends Record<string, unknown>> {
    * @param args 参数
    * @returns 返回 *.on() 的返回值
    */
-  emit<Name extends keyof T>(name: Name, ...args: any[]): any;
+  emit<Name extends string = string, TR extends any[] = any[]>(
+    name: Name,
+    ...args: TR
+  ): any;
 }
-export declare const bus: Event<Record<string, EventHandlerItem[]>>;
+export declare const bus: Event;
