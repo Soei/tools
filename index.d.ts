@@ -1,15 +1,31 @@
-// Type definitions for a/index.js
-
+// 强制展开工具类型
+type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
 type TakeFilter = (key: string, value: any, data: any) => any;
-/** 数据提取器：按规则从 data 中提取字段。
+/**
+ * ## `数据提取器`
+ * 按规则从 data 中提取字段。
+ * - ### `#使用`
+ * ```javascript
+ * // #1
+ * take({data: {name: 1}}, 'data.name:a.b.c.name', {});
+ * // #2
+ * take({name: 1}, 'na*:*,n*:*xx', {});
+ * ```
+ * - ### `#返回`
+ * ```javascript
+ * // #1
+ * {a: {b: {c: {name: 1}}}}
+ * // #2
+ * { me: 1, amexx: 1 }
+ * ```
  *  multi 支持格式："key1,key2" | "srcKey=>dstKey" | "srcKey:dstKey" | "pattern*=>target*" 等。
  *  filter 为函数时，value 从 {} 起步；filter 为非函数时作为初始值对象。
  */
 export function take<T = any>(
   data: any,
   multi: string,
-  source?: TakeFilter | T,
-  filter?: TakeFilter,
+  source?: (key: string, value: any, data: any) => any | T,
+  filter?: (key: string, value: any, data: any) => any,
 ): T;
 
 /** 遍历 Array / Object / Set / Map / NodeList。
@@ -26,7 +42,26 @@ export function each(
  */
 export function merge(host: any, ...sources: any[]): void;
 
-/** 执行方法队列。
+/**
+ * ### `执行方法队列`
+ * ```javascript
+ * runer(-1, [1, 2]);
+ * // ret: 2
+ * const res = { name: "Joyer" };
+ * runer([
+ *    // 获取 res 的 data|permission 属性
+ *    ["data", res],
+ *    ["permission", res],
+ *    [["data", "permission", "name"], res],
+ *    // 返回 res 自身, 以上都未匹配到时返回自身
+ *    [0, [res]],
+ * ]);
+ * // Or
+ * runer(fx, context, ...args)
+ * runer([fx, fx, [fx]])
+ * runer([fx, fx], ...args)
+ * // 等等
+ * ```
  *  rank 为函数/值或其嵌套数组 [[fn, context?, ...args], ...]。
  *  返回第一个非 Nil 的执行结果；-1 表示 break。
  */
@@ -88,6 +123,19 @@ export function isElement(data: any): boolean;
 /** 获取对象内部 [[Class]] 字符串，如 "[object Array]" */
 export function iTypeTo(object: any): string;
 
+/**
+ * ### `数据精度`
+ * - 解决丢精度问题
+ * ```javascript
+ * import { toFixed } from "@soei/tools"
+ * let value = toFixed(1.225, 2)
+ * value == 1.23
+ * ```
+ * @param num 目标数值
+ * @param fraction 小数
+ */
+export function toFixed(num: number | string, fraction?: number): number;
+
 /** 数值区间控制器 */
 export class Between {
   decimal: number;
@@ -100,38 +148,70 @@ export class Between {
 
 /** 获取数据的字符串长度（toString 后） */
 export function length(data: any): number;
-type EventHandlerItem = [ (...args: any[]) => void, any, ...any[] ];
 
+export type BackFx = (...args: any[]) => any;
+export type EventHandlerItem<Payload = any> =
+  | [(...args: any[]) => any, any, ...any[]]
+  | ((...args: any[]) => any)
+  | Record<string, any>
+  | [...any[]];
+
+// type EventHandlerItem = ((...args: any[]) => any) | [(...args: any[]) => any, unknown, ...any[]];
+type ExpandedHandler = Expand<EventHandlerItem>;
 /**
  * 注册事件监听
  */
-export declare class Event {
-    readonly #list: Map<string, EventHandlerItem[]>;
-    constructor(key?: string);
-    /* 销毁当前对象 */
-    destroyed(): void;
-    /**
-     * 清空当前对象监听 @
-     * 如果是单例, 清理当前 new Event(key) 中 key对应的 的所有监听
-     */
-    clear(): void
-    /**
-     * 清理 @see name 事件
-     * @param name 事件索引key
-     * @param trigger 要移除的回调函数或者完整handler数组项
-     */
-    off(name: string, trigger?: EventHandlerItem | ((...args: any[]) => void)): void;
-    /**
-     * 注册@see name 的事件处理
-     * @param name 事件索引key
-     * @param trigger 回调函数 或者 [fn, context, ...args] 数组
-     */
-    on(name: string, trigger: EventHandlerItem | ((...args: any[]) => void)): void;
-    /**
-     * 触发对应@see name 注册事件
-     * @param name 事件索引key
-     * @param args 参数
-     */
-    emit(name: string, ...args: any[]): any;
+export declare class Event<T extends Record<string, unknown>> {
+  readonly #list: T;
+  constructor(key?: string);
+
+  /* 销毁当前对象 */
+  destroyed(): void;
+  /**
+   * 清空当前对象监听 @
+   * 如果是单例, 清理当前 new Event(key) 中 key对应的 的所有监听
+   */
+  clear(): void;
+  /**
+   * 清理 @see name 事件
+   * @param name 事件索引key
+   * @param trigger 要移除的回调函数或者完整handler数组项
+   */
+  off<Name extends keyof T>(name: Name, trigger?: EventHandlerItem): void;
+  /**
+   * ### `通信` 与 `传值`
+   * ```javascript
+   * import { bus } from "@soei/tools"
+   * let value = bus.on('name', function(){
+   *  // todo
+   * })
+   * // Or
+   * let value = bus.on('name', [function(...args){
+   *  // this: context
+   * }, context[, ...args]])
+   * ```
+   * @param name 事件索引key
+   * @param trigger 回调函数 或者 [fn, context, ...args] 数组
+   * - 如果 `自身` 或者 `数组[0]` 为 `非函数`, 作为存储用, let value = emit(`@see name` [,...]); 可获取
+   * @returns 返回trigger的返回值
+   */
+  on<Name extends keyof T>(
+    name: Name,
+    trigger: Expand<EventHandlerItem<T[Name]>>,
+  ): any;
+
+  // on(name: string, trigger: EventHandlerItem): any;
+  /**
+   * ### `触发|通知`
+   * ```javascript
+   * import { bus } from "@soei/tools";
+   * // 如果对应事件有返回值, 则获取返回值
+   * let value = bus.emit('name', 1, 2, 3, 4)
+   * ```
+   * @param name 事件索引key
+   * @param args 参数
+   * @returns 返回 *.on() 的返回值
+   */
+  emit<Name extends keyof T>(name: Name, ...args: any[]): any;
 }
-export declare const bus: Event
+export declare const bus: Event<Record<string, EventHandlerItem[]>>;

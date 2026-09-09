@@ -459,7 +459,7 @@ function _Split__(items) {
     return ranks;
 }
 const PICKERMAP = {};
-let take = (data, multi, source, filter) => {
+let take = (data = {}, multi, source, filter) => {
     let _ = PICKERMAP[multi];
     if (!_) {
         _ = PICKERMAP[multi] = _Split__(multi);
@@ -531,7 +531,13 @@ class Event {
         return runer.apply(null, args);
     }
 }
+
+function toFixed(val, fraction = 2) {
+    fraction = Math.pow(10, fraction);
+    return Math.round((+val + Number.EPSILON) * fraction) / fraction
+}
 module.exports = {
+    toFixed,
     Event,
     /* 单例模式创建一个默认存储 */
     bus: new Event(),
