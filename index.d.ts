@@ -1,6 +1,7 @@
 // 强制展开工具类型
 type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
 
+export type ANY = Expand<Record<string, any>>;
 type Trim<S extends string> = S extends ` ${infer R}`
   ? Trim<R>
   : S extends `${infer L} `
@@ -20,11 +21,15 @@ type GetKey<S extends string> = S extends `${infer L}:${infer R}`
     ? L
     : [SplitColon<L>]
   : S;
+export type Result<T extends string> = Expand<
+  {
+    [Item in SplitComma<T> as SplitColon<Item>]: any; //Trim<GetKey<Item>>;
+  } & {
+    [key: string]: any; // 允许附加其它未知属性
+  }
+>;
 
-type TakeType =
-  | Record<string, any>
-  | []
-  | ((key: string, value: any, data: any) => any);
+type TakeType = ANY | [] | ((key: string, value: any, data: any) => any);
 /**
  * ## `数据提取器`
  * 按规则从 data 中提取字段。
@@ -48,17 +53,15 @@ type TakeType =
  *  filter 为函数时，value 从 {} 起步；filter 为非函数时作为初始值对象。
  */
 export function take<
-  T = Record<string, any> | [],
+  T = ANY | [],
   M extends string = string,
-  U extends TakeType = TakeType,
+  U extends TakeType = ANY,
 >(
   data: T,
   multi: M,
   source?: U,
   filter?: (key: string, value: any, data: any) => any,
-): /* U extends Function ? Record<string, any> :  */ {
-  [Item in SplitComma<M> as SplitColon<Item>]: Trim<GetKey<Item>>;
-};
+): U extends [] ? Result<M>[] : Result<M>;
 
 /** 遍历 Array / Object / Set / Map / NodeList。
  *  func 返回非 Nil 值时提前终止遍历并返回该值。
