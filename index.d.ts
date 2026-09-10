@@ -1,6 +1,26 @@
 // 强制展开工具类型
 type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
 
+type Trim<S extends string> = S extends ` ${infer R}`
+  ? Trim<R>
+  : S extends `${infer L} `
+    ? Trim<L>
+    : S;
+type SplitComma<S extends string> = S extends `${infer Item},${infer Rest}`
+  ? Trim<Item> | SplitComma<Rest>
+  : S;
+type Arr<S extends string> = S extends `${infer Item}[]` ? Item : "";
+type SplitColon<S extends string> = S extends `${infer L}:${infer R}`
+  ? Arr<R> extends ""
+    ? R
+    : Arr<R>
+  : S;
+type GetKey<S extends string> = S extends `${infer L}:${infer R}`
+  ? Arr<R> extends ""
+    ? L
+    : [SplitColon<L>]
+  : S;
+
 type TakeType =
   | Record<string, any>
   | []
@@ -36,7 +56,9 @@ export function take<
   multi: M,
   source?: U,
   filter?: (key: string, value: any, data: any) => any,
-): U extends Function ? Record<string, any> : U;
+): /* U extends Function ? Record<string, any> :  */ {
+  [Item in SplitComma<M> as SplitColon<Item>]: Trim<GetKey<Item>>;
+};
 
 /** 遍历 Array / Object / Set / Map / NodeList。
  *  func 返回非 Nil 值时提前终止遍历并返回该值。
