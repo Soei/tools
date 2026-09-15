@@ -7,24 +7,39 @@ type Trim<S extends string> = S extends ` ${infer R}`
   : S extends `${infer L} `
     ? Trim<L>
     : S;
-type SplitComma<S extends string> = S extends `${infer Item},${infer Rest}`
-  ? Trim<Item> | SplitComma<Rest>
-  : S;
 type Arr<S extends string> = S extends `${infer Item}[]` ? Item : "";
-type SplitColon<S extends string> = S extends `${infer L}:${infer R}`
-  ? Arr<R> extends ""
-    ? R
-    : Arr<R>
-  : S;
-type GetKey<S extends string> = S extends `${infer L}:${infer R}`
-  ? Arr<R> extends ""
-    ? L
-    : [SplitColon<L>]
-  : S;
+
+export type Split<
+  S extends string,
+  Sep extends string,
+  Acc extends string[] = [],
+> = S extends `${infer A}${Sep}${infer Z}`
+  ? Split<Z, Sep, [...Acc, A]>
+  : [...Acc, S];
+// 把 a.b.c 字符串路径 转为嵌套对象 {a:{b:{c:any}}}
+type Dot<S extends string> = S extends `${infer A}.${infer B}`
+  ? { [P in A]?: Dot<B> }
+  : Arr<S> extends ""
+    ? { [P in S]?: any }
+    : { [P in Arr<S>]?: [] };
+
+// 递归遍历元组，合并对象
+type MergeTuple<T extends string[]> = T extends [
+  infer Item extends string,
+  ...infer Rest extends string[],
+]
+  ? Split<Item, ":"> extends [infer K, infer V extends string]
+    ? // K 是key，V是 a.a.a 这种路径，转成嵌套对象，和剩下的Rest合并
+      Dot<V> & MergeTuple<Rest>
+    : // 没有冒号，直接用Item作为路径
+      Dot<Item> & MergeTuple<Rest>
+  : {}; // 递归终止：空元组返回空对象
+
+// 入口：字符串 → 逗号分割元组 → 遍历每一项并冒号拆分
+type ParseStr<S extends string> = MergeTuple<Split<S, ",">>;
+
 export type Result<T extends string> = Expand<
-  {
-    [Item in SplitComma<T> as SplitColon<Item>]: any; //Trim<GetKey<Item>>;
-  } & {
+  Expand<ParseStr<T>> & {
     [key: string]: any; // 允许附加其它未知属性
   }
 >;
