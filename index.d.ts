@@ -1,5 +1,5 @@
 // 强制展开工具类型
-type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
+export type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
 
 export type ANY = Expand<Record<string, any>>;
 type Trim<S extends string> = S extends ` ${infer R}`
@@ -38,11 +38,12 @@ type MergeTuple<T extends string[]> = T extends [
 // 入口：字符串 → 逗号分割元组 → 遍历每一项并冒号拆分
 type ParseStr<S extends string> = MergeTuple<Split<S, ",">>;
 
-export type Result<T extends string> = Expand<
-  Expand<ParseStr<T>> & {
+export type Result<
+  T extends string,
+  M extends unknown = {
     [key: string]: any; // 允许附加其它未知属性
-  }
->;
+  },
+> = Expand<ParseStr<T> & M>;
 
 type TakeType = ANY | [] | ((key: string, value: any, data: any) => any);
 /**
@@ -76,7 +77,7 @@ export function take<
   multi: M,
   source?: U,
   filter?: (key: string, value: any, data: any) => any,
-): U extends [] ? Result<M>[] : Result<M>;
+): U extends any[] ? Result<M>[] : Result<M>;
 
 /** 遍历 Array / Object / Set / Map / NodeList。
  *  func 返回非 Nil 值时提前终止遍历并返回该值。
