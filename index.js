@@ -479,9 +479,6 @@ let take = (data = {}, multi, source, filter) => {
  * 处理事件
  */
 class Event {
-    list;
-    name;
-    static map = new Map();
     constructor(key) {
         this.name = key;
         let M = Event.map;
@@ -497,20 +494,21 @@ class Event {
     /**
      * 清理 @see name 事件
      * @param {String} name 事件索引key
-     * @param {Array<[Function, context, ...args]>|Function} trigger 
+     * @param {Array<[Function, context, ...args]>|Function} trigger
      */
     off(name, trigger) {
         let list = this.list;
         if (trigger) {
             let trs = list.get(name) || [];
             trs.splice(trs.indexOf(trigger), 1);
-        } else
-            list.delete(name)
+        } else {
+            list.delete(name);
+        }
     }
     /**
      * 注册@see name 的事件处理
      * @param {String} name 事件索引key
-     * @param {Array<[Function, context, ...args]>|Function} trigger 
+     * @param {Array<[Function, context, ...args]>|Function} trigger
      */
     on(name, trigger) {
         let trs = this.list.get(name);
@@ -520,17 +518,19 @@ class Event {
     /**
      * 触发对应@see name 注册事件
      * @param {String} name 事件索引key
-     * @param  {...any} ...args 参数
+     * @param  {...any} args 参数
      */
     emit(name) {
         let args = iList2Array(arguments);
         let trs = this.list.get(name) || [[function (name) {
-            console.warn('[', name, '] Not Found !')
+            console.warn('[', name, '] Not Found !');
         }, null, name]];
-        args.splice(0, 1, trs/* 执行列表 */, null/* 执行上下文 , this */);
+        args.splice(0, 1, trs /* 执行列表 */, null /* 执行上下文 , this */);
         return runer.apply(null, args);
     }
 }
+// 静态map
+Event.map = new Map();
 
 function toFixed(val, fraction = 2) {
     fraction = Math.pow(10, fraction);
